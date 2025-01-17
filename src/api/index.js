@@ -104,6 +104,24 @@ API.getClass = () => {
 API.addClass=(data)=>{
   return API.post('/web/educationist/create-class',data)
 }
+API.getDoctors = () => {
+  return API.get(`web/health-care`);
+};
+API.addDoctor=(data)=>{
+  return API.post('/web/health-care/create-doctor',data)
+}
+API.getLaboratory = () => {
+  return API.get(`web/health-care/lab-test`);
+};
+API.addLaboratory=(data)=>{
+  return API.post('/web/health-care/create-laboratory-test',data)
+}
+API.getReport = () => {
+  return API.get(`web/health-care/lab-reports`);
+};
+API.addReport=(data)=>{
+  return API.post('/web/health-care/create-laboratory-test',data)
+}
 API.addMemberClass=(data)=>{
   return API.post('/web/educationist/add-member-to-class',data)
 }

@@ -12,7 +12,7 @@ const TextErea = ({ className, type, name, inputStyle, show=false, register, err
         type={type}
         {...(register && register(name))}
         className={cn(
-          `flex h-9 w-full focus:outline-none  rounded-md text-white  px-3 py-1 text-sm shadow-sm  file:bg-transparent file:text-sm file:font-medium ${inputStyle}`,
+          `flex h-9 w-full focus:outline-none  rounded-md text-black  px-3 py-1 text-sm shadow-sm  file:bg-transparent file:text-sm file:font-medium ${inputStyle}`,
           className
         )}
         {...props}

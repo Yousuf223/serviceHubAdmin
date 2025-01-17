@@ -1,7 +1,10 @@
 export function middleware(request) {
   const currentUser = request.cookies.get("token")?.value;
   if (currentUser && request.nextUrl.pathname.startsWith("/auth")) {
+    const adminProfile = request.cookies.get("adminProfile")?.value;
+    console.log('hsadghasgdhsagdhgsa',adminProfile)
     return Response.redirect(new URL("/", request.url));
+ 
   }
 
   if (!currentUser && !request.nextUrl.pathname.startsWith("/auth")) {

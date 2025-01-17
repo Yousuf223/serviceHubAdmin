@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  CaretSortIcon,
-} from "@radix-ui/react-icons";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import {
   flexRender,
   getCoreRowModel,
@@ -25,26 +23,36 @@ import { API } from "@/api";
 import { Loader } from "@/components/custom/Loader";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
-import moment from 'moment';
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
+import moment from "moment";
+import EventAction from "@/components/actionsCol/EventAction";
+import { AddClassModal } from "@/components/ui/addClassModal";
+import { AddDoctorModal } from "@/components/ui/addDoctor";
+import { AddLaboratryModal } from "@/components/ui/addLaboratry";
+import { useRouter } from "next/navigation";
 
-
-
-function DataTableRestaurant() {
+function Page() {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [loader, setLoader] = useState(false);
+  const [open, setOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const { toast } = useToast();
+  const router = useRouter()
+  const [toggal, setToggal] = useState("Planned_Events");
+  
+  // const statusQuery = query.get("order_status");
+  const changeStatus = (status) => {
+    setToggal(status);
+  };
 
-
-  const getUser = async () => {
+  const getBooking = async () => {
     try {
       setLoader(true);
-      const res = await API.getNotification();
-      console.log('-----res-----',res)
+      const res = await API.getLaboratory();
       setUsers(res?.data?.data);
     } catch (error) {
       console.log(error);
@@ -54,93 +62,100 @@ function DataTableRestaurant() {
   };
 
   useEffect(() => {
-    getUser()
-  }, []);
+    getBooking();
+  }, [toggal]);
 
-// table columns
+  // table columns
   const columns = [
     {
-      accessorKey: "metadata",
+      accessorKey: "testName",
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Image
+          Test Name
           <CaretSortIcon className="ml-2 h-4 w-4" />
         </Button>
       ),
       cell: ({ row }) => (
-        console.log("hdksahdksadjs", row?.original?.metadata?.profileUrl),
-        (
-          <div className="capitalize flex justify-evenly items-center">
-            <Avatar>
-              <AvatarImage
-                className={"w-16 h-16 "}
-                src={row?.original?.metadata?.profileUrl}
-              />
-            </Avatar>
-   
+        <div >
+          <div className="lowercase  text-black pt-6 pb-6">
+            {`${row?.original.testName}`}
           </div>
-        )
+        </div>
       ),
     },
     {
-      accessorKey: "metadata",
+      accessorKey: "sampleRequired",
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          User
+          Sample
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue("sampleRequired")}</div>,
+    },
+    {
+      accessorKey: "description",
+      header: ({ column }) => (
+        <Button
+          className={''}
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Description
           <CaretSortIcon className="ml-2 h-4 w-4" />
         </Button>
       ),
       cell: ({ row }) => (
-        console.log("hdksahdksadjs", row?.original?.metadata?.profileUrl),
-        (
-          <div className="capitalize flex justify-evenly items-center">
-
-            <p>{row?.original?.metadata?.firstName + ' ' + row?.original?.metadata?.lastName}</p>
-          </div>
-        )
+        <div className="">
+          {row.getValue("description")}
+        </div>
       ),
     },
     {
-      accessorKey: "title",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Title
-            <CaretSortIcon className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
+      accessorKey: "testFees",
+      header: ({ column }) => (
+        <Button
+          className={''}
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+         Test Fees
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("title")}</div>
+        <div className="">
+          {row.getValue("testFees")}
+        </div>
       ),
     },
     {
-      accessorKey: "message",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Message
-            <CaretSortIcon className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
+      accessorKey: "_id",
+      header: "",
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("message")}</div>
+        <div 
+        onClick={()=>router.push('/addRport')}
+        // onClick={() => addMember(row.getValue("_id"))} 
+        className="bg-primary cursor-pointer w-44 h-11 text-white rounded-md flex justify-center items-center">
+          Add Report
+          {loader && <Loader />}
+        </div>
       ),
     },
+    // {
+    //   id: "actions",
+    //   enableHiding: false,
+    //   cell: ({ row }) => <EventAction toggal={toggal} row={row} getUser={getBooking} />
+    // },
   ];
+
+
 
   // table instance
   const table = useReactTable({
@@ -162,22 +177,13 @@ function DataTableRestaurant() {
     },
   });
 
-
   return (
     <div className="w-full">
-      <h2 className="text-4xl text-start text-primary font-bold ">
-        Notifications
-      </h2>
-      <div className="flex items-center py-4">
-        {/* <Input
-          placeholder="Filter emails..."
-          value={table.getColumn("email")?.getFilterValue() ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        /> */}
-
+      <h2 className="text-4xl text-start text-primary font-bold ">Laboratory</h2>
+      <div className="flex justify-end mt-4 w-full">
+        <div onClick={()=>setOpen(true)} className="bg-primary w-40 h-11 flex justify-center items-center mb-2 rounded-md cursor-pointer ">
+          <p className="text-white">Add Laboratory</p>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -190,9 +196,9 @@ function DataTableRestaurant() {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}
@@ -202,7 +208,7 @@ function DataTableRestaurant() {
           <TableBody>
             {loader ? (
               <TableRow className="">
-                <TableCell colSpan={columns.length} className="h-24 ">
+                <TableCell colSpan={columns?.length} className="h-24 ">
                   <div className="w-full flex justify-center">
                     <Loader
                       className={"h-6 w-6 text-primary"}
@@ -211,13 +217,13 @@ function DataTableRestaurant() {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : table.getRowModel().rows?.length ? (
+            ) : users && table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row.getVisibleCells().map((cell) => (
+                  {row.getVisibleCells()?.map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -230,7 +236,7 @@ function DataTableRestaurant() {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={columns?.length}
                   className="h-24 text-center"
                 >
                   No results.
@@ -254,14 +260,21 @@ function DataTableRestaurant() {
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            disabled={table?.length && !table?.getCanNextPage()}
           >
             Next
           </Button>
         </div>
       </div>
+      {open && <AddLaboratryModal
+        open={open}
+        // getBooking={getBooking}
+        setOpen={setOpen}>
+
+      </AddLaboratryModal>}
+
     </div>
   );
 }
 
-export default DataTableRestaurant;
+export default Page;

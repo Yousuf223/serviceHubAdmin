@@ -11,6 +11,20 @@ export const addClasses = yup.object().shape({
   description: yup.string().required("Description is required"),
   classCode: yup.string().required("Class Code is required"),
 });
+export const addDoctorSehema = yup.object().shape({
+  doctorName: yup.string().required('Doctor name is required'),
+  startTime: yup.string().required('startTime are required'),
+  endTime: yup.string().required('endTime are required'),
+  category: yup.string().required('Specialistion is required'),
+  fees: yup.number().required('Fees are required'),
+  days: yup.array().min(1, 'At least one day is required'),
+});
+
+export const addLabortorySehema = yup.object().shape({
+  testName: yup.string().required('Test name is required'),
+  testFees: yup.number().required('Fees are required'),
+  description: yup.string().required('description is required'),
+});
 
 export const otpSchema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email is required"),

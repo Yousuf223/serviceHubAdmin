@@ -1,15 +1,7 @@
 "use client";
 
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import {
-  CaretSortIcon,
-  ChevronDownIcon,
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons";
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -17,18 +9,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -38,31 +19,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { API } from "@/api";
 import { Loader } from "@/components/custom/Loader";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
-import RefundRequest from "@/components/actionsCol/RefundRequest";
-
-
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
+import moment from "moment";
+import EventAction from "@/components/actionsCol/EventAction";
+import { AddClassModal } from "@/components/ui/addClassModal";
+import { AddDoctorModal } from "@/components/ui/addDoctor";
+import { AddLaboratryModal } from "@/components/ui/addLaboratry";
 
 function Page() {
   const [sorting, setSorting] = useState([]);
@@ -70,17 +37,21 @@ function Page() {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [loader, setLoader] = useState(false);
+  const [open, setOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const { toast } = useToast();
+  const [toggal, setToggal] = useState("Planned_Events");
+  
+  // const statusQuery = query.get("order_status");
+  const changeStatus = (status) => {
+    setToggal(status);
+  };
 
-
-  const getUser = async () => {
+  const getBooking = async () => {
     try {
       setLoader(true);
-      const res = await API.getHorses();
-      console.log('-----res-----',res)
-      setUsers(res?.data?.data)
-      // console.log(res?.data?.data);
+      const res = await API.getReport();
+      setUsers(res?.data?.data);
     } catch (error) {
       console.log(error);
     } finally {
@@ -89,117 +60,123 @@ function Page() {
   };
 
   useEffect(() => {
-    getUser()
-  }, []);
+    getBooking();
+  }, [toggal]);
 
-// table columns
+  // table columns
   const columns = [
     {
-      accessorKey: "User.profileUrl",
-      header: "Image",
-      cell: ({ row }) => {
-        // console.log(row.getValue('authId')); 
-        return (
-          <Link href={`/post/${row?.original?._id}`} className="w-full flex justify-center ">
-            <Avatar className="">
-              <AvatarImage src={row.original?.User?.profileUrl} />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-          </Link>
-        );
-      },
-    },
-    {
-      accessorKey: "User.firstName",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            First Name
-            <CaretSortIcon className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (       
-        <div className="capitalize">{row.original?.User?.firstName}</div>
+      accessorKey: "testName",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Test Name
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
       ),
-    },
-    {
-      accessorKey: "User.lastName",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Last Name
-            <CaretSortIcon className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
       cell: ({ row }) => (
-        <div className="capitalize">{row.original?.User?.lastName}</div>
+        <div >
+          <div className="lowercase  text-black pt-6 pb-6">
+            {`${row?.original.testName}`}
+          </div>
+        </div>
       ),
     },
     {
-      accessorKey: "horseName",
-      header: ({ column }) => {
-        return (
+      accessorKey: "patientName",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Patient Name
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue("patientName")}</div>,
+    },
+    {
+      accessorKey: "patientAge",
+      header: ({ column }) => (
+        <Button
+          className={''}
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Patient Age
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="">
+          {row.getValue("patientAge")}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "testCost",
+      header: ({ column }) => (
+        <Button
+          className={''}
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+         Test Cost
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="">
+          {row.getValue("testCost")}
+        </div>
+      ),
+    },
+    {
+        accessorKey: "comments",
+        header: ({ column }) => (
           <Button
+            className={''}
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Horse Name
+           Comments
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
-        );
+        ),
+        cell: ({ row }) => (
+          <div className="">
+            {row.getValue("comments")}
+          </div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("horseName")}</div>
-      ),
-    },
-    {
-      accessorKey: "height",
-      header: ({ column }) => {
-        return (
+      {
+        accessorKey: "reportIssuedDate",
+        header: ({ column }) => (
           <Button
+            className={''}
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Height
+           Issue Date
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
-        );
+        ),
+        cell: ({ row }) => (
+          <div className="">
+            {moment(row.getValue("reportIssuedDate")).format('MM-DD-YYYY')}
+          </div>
+        ),
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("height")}</div>
-      ),
-    },
-    {
-      accessorKey: "weight",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Weight
-            <CaretSortIcon className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("weight")}</div>
-      ),
-    },
-    {
-      id: "actions",
-      enableHiding: false,
-      cell:RefundRequest
-    },
+    // {
+    //   id: "actions",
+    //   enableHiding: false,
+    //   cell: ({ row }) => <EventAction toggal={toggal} row={row} getUser={getBooking} />
+    // },
   ];
+
+
 
   // table instance
   const table = useReactTable({
@@ -221,14 +198,9 @@ function Page() {
     },
   });
 
-
   return (
     <div className="w-full">
-      <h2 className="text-4xl text-start text-primary font-bold ">
-        Horses
-      </h2>
-      <div className="flex items-center py-4">
-      </div>
+      <h2 className="text-4xl text-start text-primary font-bold ">Reports</h2>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -240,9 +212,9 @@ function Page() {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}
@@ -252,7 +224,7 @@ function Page() {
           <TableBody>
             {loader ? (
               <TableRow className="">
-                <TableCell colSpan={columns.length} className="h-24 ">
+                <TableCell colSpan={columns?.length} className="h-24 ">
                   <div className="w-full flex justify-center">
                     <Loader
                       className={"h-6 w-6 text-primary"}
@@ -261,13 +233,13 @@ function Page() {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : table.getRowModel().rows?.length ? (
+            ) : users && table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row.getVisibleCells().map((cell) => (
+                  {row.getVisibleCells()?.map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -280,7 +252,7 @@ function Page() {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={columns?.length}
                   className="h-24 text-center"
                 >
                   No results.
@@ -304,12 +276,14 @@ function Page() {
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            disabled={table?.length && !table?.getCanNextPage()}
           >
             Next
           </Button>
         </div>
       </div>
+
+
     </div>
   );
 }

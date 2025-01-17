@@ -60,10 +60,10 @@ export default function Page() {
       };
       setLoader(true);
       const res = await API.loginUser(payload);
-     
+     console.log('resresres',res)
       if(res){
         Cookies.set("token", res?.data?.token);
-        Cookies.set("adminProfile", res?.data?.data)
+        Cookies.set("adminProfile", res?.data?.data?.role)
         toast({
           variant: "",
           title: "Request Successfull.",
