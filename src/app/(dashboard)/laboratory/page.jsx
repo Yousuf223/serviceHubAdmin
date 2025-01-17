@@ -140,7 +140,7 @@ function Page() {
       header: "",
       cell: ({ row }) => (
         <div 
-        onClick={()=>router.push('/addRport')}
+        // onClick={()=>router.push('/addRport')}
         // onClick={() => addMember(row.getValue("_id"))} 
         className="bg-primary cursor-pointer w-44 h-11 text-white rounded-md flex justify-center items-center">
           Add Report
