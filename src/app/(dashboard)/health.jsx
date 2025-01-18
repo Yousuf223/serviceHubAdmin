@@ -22,17 +22,9 @@ import { useEffect, useState } from "react";
 import { API } from "@/api";
 import { Loader } from "@/components/custom/Loader";
 import { useToast } from "@/components/ui/use-toast";
-import Link from "next/link";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Image from "next/image";
-import moment from "moment";
-import EventAction from "@/components/actionsCol/EventAction";
-import { AddClassModal } from "@/components/ui/addClassModal";
 import { AddDoctorModal } from "@/components/ui/addDoctor";
-import { AddLaboratryModal } from "@/components/ui/addLaboratry";
-import { useRouter } from "next/navigation";
 
-function Page() {
+function Health() {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -41,7 +33,6 @@ function Page() {
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const { toast } = useToast();
-  const router = useRouter()
   const [toggal, setToggal] = useState("Planned_Events");
   
   // const statusQuery = query.get("order_status");
@@ -52,7 +43,7 @@ function Page() {
   const getBooking = async () => {
     try {
       setLoader(true);
-      const res = await API.getLaboratory();
+      const res = await API.getDoctors();
       setUsers(res?.data?.data);
     } catch (error) {
       console.log(error);
@@ -68,83 +59,100 @@ function Page() {
   // table columns
   const columns = [
     {
-      accessorKey: "testName",
+      accessorKey: "doctorName",
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Test Name
+          Doctor Name
           <CaretSortIcon className="ml-2 h-4 w-4" />
         </Button>
       ),
       cell: ({ row }) => (
         <div >
+          {/* Uncomment if needed */}
+          {/* <Image
+            className="object-contain mr-4"
+            src={row?.original?.User?.profileUrl}
+            width={30}
+            height={30}
+            alt="Picture of the author"
+          /> */}
           <div className="lowercase  text-black pt-6 pb-6">
-            {`${row?.original.testName}`}
+            {`${row?.original.doctorName}`}
           </div>
         </div>
       ),
     },
     {
-      accessorKey: "sampleRequired",
+      accessorKey: "clinicTimings",
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Sample
+          Time
           <CaretSortIcon className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => <div>{row.getValue("sampleRequired")}</div>,
+      cell: ({ row }) => <div>{row.getValue("clinicTimings")}</div>,
     },
     {
-      accessorKey: "description",
-      header: ({ column }) => (
-        <Button
-          className={''}
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Description
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className="">
-          {row.getValue("description")}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "testFees",
+      accessorKey: "category",
       header: ({ column }) => (
         <Button
           className={''}
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-         Test Fees
+          Category
           <CaretSortIcon className="ml-2 h-4 w-4" />
         </Button>
       ),
       cell: ({ row }) => (
         <div className="">
-          {row.getValue("testFees")}
+          {row.getValue("category")}
         </div>
       ),
     },
     {
-      accessorKey: "_id",
-      header: "",
+      accessorKey: "fees",
+      header: ({ column }) => (
+        <Button
+          className={''}
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Fees
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => (
-        <div 
-        onClick={()=>router.push(`/addReport?id=${row.original._id}`)}
-        // onClick={() => addMember(row.getValue("_id"))} 
-        className="bg-primary cursor-pointer w-44 h-11 text-white rounded-md flex justify-center items-center">
-          Add Report
-          {loader && <Loader />}
+        <div className="">
+          {row.getValue("fees")}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "days",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+        Days
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="lowercase">
+          {row?.original?.days?.map((item,index)=>{
+            return(
+              <div key={index}>{item}</div>
+            )
+          })}
+       
         </div>
       ),
     },
@@ -179,10 +187,10 @@ function Page() {
 
   return (
     <div className="w-full">
-      <h2 className="text-4xl text-start text-primary font-bold ">Laboratory</h2>
+      <h2 className="text-4xl text-start text-primary font-bold ">Doctors</h2>
       <div className="flex justify-end mt-4 w-full">
         <div onClick={()=>setOpen(true)} className="bg-primary w-40 h-11 flex justify-center items-center mb-2 rounded-md cursor-pointer ">
-          <p className="text-white">Add Laboratory</p>
+          <p className="text-white">Add Doctor</p>
         </div>
       </div>
       <div className="rounded-md border">
@@ -266,15 +274,16 @@ function Page() {
           </Button>
         </div>
       </div>
-      {open && <AddLaboratryModal
+      {open && <AddDoctorModal
+        title={"Are you sure you want to delete this Add?"}
         open={open}
         // getBooking={getBooking}
         setOpen={setOpen}>
 
-      </AddLaboratryModal>}
+      </AddDoctorModal>}
 
     </div>
   );
 }
 
-export default Page;
+export default Health;

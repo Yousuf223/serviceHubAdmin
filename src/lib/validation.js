@@ -19,7 +19,15 @@ export const addDoctorSehema = yup.object().shape({
   fees: yup.number().required('Fees are required'),
   days: yup.array().min(1, 'At least one day is required'),
 });
-
+export const addReportSchema = yup.object().shape({
+  patientName: yup.string().required('Patient name is required'),
+  phoneNumber: yup.string().required('Phone Number are required'),
+  patientAge: yup.string().required('Age are required'),
+  comments: yup.string().required('Comments are required'),
+  gender: yup.string().required("Gender is required"),
+  reportIssuedDate: yup.string().required('Issue Date are required'),
+  testCost: yup.string().required('Test Cost are required'),
+});
 export const addLabortorySehema = yup.object().shape({
   testName: yup.string().required('Test name is required'),
   testFees: yup.number().required('Fees are required'),

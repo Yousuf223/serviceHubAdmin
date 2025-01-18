@@ -1,6 +1,18 @@
 "use client";
 
+import { API } from "@/api";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { FaUsers } from "react-icons/fa";
+import dynamic from "next/dynamic";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { CaretSortIcon } from "@radix-ui/react-icons";
+import UserAction from "@/components/actionsCol/UserAction";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Loader } from "@/components/custom/Loader";
+import { useToast } from "@/components/ui/use-toast";
 import {
   flexRender,
   getCoreRowModel,
@@ -9,49 +21,24 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useEffect, useState } from "react";
-import { API } from "@/api";
-import { Loader } from "@/components/custom/Loader";
-import { useToast } from "@/components/ui/use-toast";
-import Link from "next/link";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Image from "next/image";
-import moment from "moment";
-import EventAction from "@/components/actionsCol/EventAction";
-import { AddClassModal } from "@/components/ui/addClassModal";
-import { AddDoctorModal } from "@/components/ui/addDoctor";
-import { AddLaboratryModal } from "@/components/ui/addLaboratry";
 
-function Page() {
+export default function Education() {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [loader, setLoader] = useState(false);
-  const [open, setOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const { toast } = useToast();
-  const [toggal, setToggal] = useState("Planned_Events");
-  
-  // const statusQuery = query.get("order_status");
-  const changeStatus = (status) => {
-    setToggal(status);
-  };
 
-  const getBooking = async () => {
+
+  const getUser = async () => {
     try {
       setLoader(true);
-      const res = await API.getReport();
-      setUsers(res?.data?.data);
+      const res = await API.getUsers();
+      console.log('-----res-----', res)
+      const filterData = res?.data?.data?.filter(i => i?.isCreatedProfile !== false)
+      setUsers(filterData);
     } catch (error) {
       console.log(error);
     } finally {
@@ -60,123 +47,113 @@ function Page() {
   };
 
   useEffect(() => {
-    getBooking();
-  }, [toggal]);
+    getUser()
+  }, []);
 
-  // table columns
+  const addMember = async (id) => {
+    try {
+      setLoader(true);
+      const data = {
+        memberId: id
+      }
+      const res = await API.addMember(data);
+      console.log('-----res-----', res)
+      if(res){
+        toast({
+          variant: "",
+          title: "Member Added Successfull.", 
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoader(false);
+    }
+  };
+
   const columns = [
     {
-      accessorKey: "testName",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Test Name
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      accessorKey: "profilePicture",
+      header: "Image",
       cell: ({ row }) => (
-        <div >
-          <div className="lowercase  text-black pt-6 pb-6">
-            {`${row?.original.testName}`}
-          </div>
+        <div className="w-full flex justify-center ">
+          <Avatar className="">
+            <AvatarImage className={'rounded-full'} src={row.getValue("profilePicture")} />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
         </div>
       ),
     },
     {
-      accessorKey: "patientName",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Patient Name
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => <div>{row.getValue("patientName")}</div>,
-    },
-    {
-      accessorKey: "patientAge",
-      header: ({ column }) => (
-        <Button
-          className={''}
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Patient Age
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className="">
-          {row.getValue("patientAge")}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "testCost",
-      header: ({ column }) => (
-        <Button
-          className={''}
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-         Test Cost
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className="">
-          {row.getValue("testCost")}
-        </div>
-      ),
-    },
-    {
-        accessorKey: "comments",
-        header: ({ column }) => (
+      accessorKey: "firstName",
+      header: ({ column }) => {
+        return (
           <Button
-            className={''}
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-           Comments
+            First Name
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
-        ),
-        cell: ({ row }) => (
-          <div className="">
-            {row.getValue("comments")}
-          </div>
-        ),
+        );
       },
-      {
-        accessorKey: "reportIssuedDate",
-        header: ({ column }) => (
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("firstName")}</div>
+      ),
+    },
+    {
+      accessorKey: "lastName",
+      header: ({ column }) => {
+        return (
           <Button
-            className={''}
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-           Issue Date
+            Last Name
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
-        ),
-        cell: ({ row }) => (
-          <div className="">
-            {moment(row.getValue("reportIssuedDate")).format('MM-DD-YYYY')}
-          </div>
-        ),
+        );
       },
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("lastName")}</div>
+      ),
+    },
+    {
+      accessorKey: "email",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Email
+            <CaretSortIcon className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+      cell: ({ row }) => <div className="">{row.getValue("email")}</div>,
+    },
+    {
+      accessorKey: "_id",
+      header: "",
+      cell: ({ row }) => (
+        <div onClick={() => addMember(row.getValue("_id"))} className="bg-primary cursor-pointer w-44 h-11 text-white rounded-md flex justify-center items-center">
+          Add Member
+          {loader && <Loader />}
+        </div>
+      ),
+    },
+
+
+
     // {
-    //   id: "actions",
-    //   enableHiding: false,
-    //   cell: ({ row }) => <EventAction toggal={toggal} row={row} getUser={getBooking} />
+    //   accessorKey: "is_blocked",
+    //   header: "Status",
+    //   cell: ({ row }) => (
+    //     <p>{row.getValue("is_blocked") === 0 ? <span className="text-green-700 font-semibold">Active</span> : <span className="text-red-700 font-semibold">Blocked</span>}</p>
+    //   ),
     // },
   ];
-
-
 
   // table instance
   const table = useReactTable({
@@ -198,10 +175,24 @@ function Page() {
     },
   });
 
+
   return (
     <div className="w-full">
-      <h2 className="text-4xl text-start text-primary font-bold ">Reports</h2>
-      <div className="rounded-md border mt-7">
+      <h2 className="text-4xl text-start text-primary font-bold ">
+        Users
+      </h2>
+      <div className="flex items-center py-4">
+        {/* <Input
+          placeholder="Filter emails..."
+          value={table.getColumn("email")?.getFilterValue() ?? ""}
+          onChange={(event) =>
+            table.getColumn("email")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        /> */}
+
+      </div>
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -224,7 +215,7 @@ function Page() {
           <TableBody>
             {loader ? (
               <TableRow className="">
-                <TableCell colSpan={columns?.length} className="h-24 ">
+                <TableCell colSpan={columns.length} className="h-24 ">
                   <div className="w-full flex justify-center">
                     <Loader
                       className={"h-6 w-6 text-primary"}
@@ -233,13 +224,13 @@ function Page() {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : users && table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows?.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row.getVisibleCells()?.map((cell) => (
+                  {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -252,7 +243,7 @@ function Page() {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns?.length}
+                  colSpan={columns.length}
                   className="h-24 text-center"
                 >
                   No results.
@@ -276,16 +267,13 @@ function Page() {
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
-            disabled={table?.length && !table?.getCanNextPage()}
+            disabled={!table.getCanNextPage()}
           >
             Next
           </Button>
         </div>
       </div>
-
-
     </div>
   );
-}
 
-export default Page;
+}

@@ -1,9 +1,6 @@
 "use client";
 import {
   FaChartBar,
-  FaChild,
-  FaFile,
-  FaHandHolding,
   FaHandshake,
   FaImages,
   FaUser,
@@ -33,7 +30,8 @@ export default function Sidebar({ sidebarSize }) {
   const path = usePathname();
   const router = useRouter();
   const { toast } = useToast();
-
+  const adminProfile = Cookies.get("adminProfile");
+  console.log('adminProfileadminProfile', adminProfile)
   const [profilePic, setPic] = useState("")
   const [email, setEmail] = useState("")
 
@@ -57,13 +55,12 @@ export default function Sidebar({ sidebarSize }) {
   };
 
   useEffect(() => {
-    // getProfile()
+  setPic(adminProfile)
   }, [])
 
 
-  const adminProfile = Cookies.get("adminProfile");
-  console.log('adminProfileadminProfile', adminProfile)
-  return (
+
+  return (  
     <div className="flex-col h-full  justify-center items-center p-6">
       <div className={"mb-8"}>
         <p className="text-black font-medium">Service Hub</p>
@@ -73,15 +70,15 @@ export default function Sidebar({ sidebarSize }) {
       </div>
       {sidebarSize > 10 ? (
         // full size
-        adminProfile == 'Healthcare' ? <div className="sm:text-sm">
+        profilePic == 'Healthcare' ? <div className="sm:text-sm">
           <Separator className="my-4" />
           <Link
-            href={"/doctors"}
-            className={`flex mb-2 w-full h-9 text-center rounded-lg items-center  ${path == "/doctors" ? "bg-primary" : "hover:bg-gray-400"
+            href={"/"}
+            className={`flex mb-2 w-full h-9 text-center rounded-lg items-center  ${path == "/" ? "bg-primary" : "hover:bg-gray-400"
               }`}
           >
-            <FaUsers className={`mr-2 h-4 min-w-8 ${path == "/doctors" ? "text-white" : "text-black"}`} />{" "}
-            <p className={`sm:hidden xl:flex ${path == "/doctors" ? "text-white" : "text-black"}`}>Doctors</p>
+            <FaUsers className={`mr-2 h-4 min-w-8 ${path == "/" ? "text-white" : "text-black"}`} />{" "}
+            <p className={`sm:hidden xl:flex ${path == "/" ? "text-white" : "text-black"}`}>Doctors</p>
           </Link>
           <Link
             href={"/laboratory"}

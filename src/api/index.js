@@ -120,7 +120,7 @@ API.getReport = () => {
   return API.get(`web/health-care/lab-reports`);
 };
 API.addReport=(data)=>{
-  return API.post('/web/health-care/create-laboratory-test',data)
+  return API.post('/web/health-care/submit-lab-report',data)
 }
 API.addMemberClass=(data)=>{
   return API.post('/web/educationist/add-member-to-class',data)
